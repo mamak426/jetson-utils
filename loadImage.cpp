@@ -24,7 +24,7 @@
 #include "cudaMappedMemory.h"
 #include "filesystem.h"
 
-#include <QImage>
+#include <QtGui/QImage>
 
 
 // saveImageRGBA
