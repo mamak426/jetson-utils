@@ -9,9 +9,19 @@ if(hasParent)
 	message("-- jetson-utils:  building as submodule, ${hasParent}")
 	
 	# configure Qt
-	find_package(Qt4 REQUIRED)
-	include(${QT_USE_FILE})
-	add_definitions(${QT_DEFINITIONS})
+	find_package(Qt5Core)
+	find_package(Qt5Gui)
+	IF ( Qt5Core_FOUND AND Qt5Gui_FOUND)
+	    set(QT_INCLUDES ${Qt5OpenGL_INCLUDE_DIRS})
+	ELSE()
+	    find_package(Qt4 REQUIRED QtCore QtGui)
+	    IF (QT4_FOUND)
+	        add_definitions(-D__QT4_USE_UNICODE)
+	        include(${QT_USE_FILE})
+	                set(QT_INCLUDES ${QT_INCLUDES} ${QT_INCLUDE_DIR} ${QT_QTCORE_INCLUDE_DIR} ${QT_QTGUI_INCLUDE_DIR})
+	        set(QT_ALL_LIBRARIES ${QT_LIBRARIES} ${QT_QTCORE_LIBRARY})
+	    ENDIF (QT4_FOUND)
+	ENDIF ()
 else()
 	message("-- jetson-utils:  building as standalone")
 	
@@ -22,9 +32,19 @@ else()
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")	
   
 	# Qt is used to load images (installed by ubuntu-desktop)
-	find_package(Qt4 REQUIRED)
-	include(${QT_USE_FILE})
-	add_definitions(${QT_DEFINITIONS})
+	find_package(Qt5Core)
+	find_package(Qt5Gui)
+	IF ( Qt5Core_FOUND AND Qt5Gui_FOUND)
+	    set(QT_INCLUDES ${Qt5OpenGL_INCLUDE_DIRS})
+	ELSE()
+	    find_package(Qt4 REQUIRED QtCore QtGui)
+	    IF (QT4_FOUND)
+	        add_definitions(-D__QT4_USE_UNICODE)
+	        include(${QT_USE_FILE})
+	                set(QT_INCLUDES ${QT_INCLUDES} ${QT_INCLUDE_DIR} ${QT_QTCORE_INCLUDE_DIR} ${QT_QTGUI_INCLUDE_DIR})
+	        set(QT_ALL_LIBRARIES ${QT_LIBRARIES} ${QT_QTCORE_LIBRARY})
+	    ENDIF (QT4_FOUND)
+	ENDIF ()
 	
 	# setup CUDA
 	find_package(CUDA)
@@ -79,7 +99,9 @@ file(GLOB jetsonUtilitySources *.cpp camera/*.cpp codec/*.cpp cuda/*.cu display/
 file(GLOB jetsonUtilityIncludes *.h camera/*.h codec/*.h cuda/*.h display/*.h input/*.h network/*.h threads/*.h)
 
 cuda_add_library(jetson-utils SHARED ${jetsonUtilitySources})
-target_link_libraries(jetson-utils Qt4::QtGui GL GLEW gstreamer-1.0 gstapp-1.0)	
+
+# target_link_libraries(jetson-utils Qt4::QtGui GL GLEW gstreamer-1.0 gstapp-1.0)	
+target_link_libraries(jetson-utils Qt5::Core Qt5::Gui GLEW gstreamer-1.0 gstapp-1.0)	
 
 
 # transfer all headers to the include directory
